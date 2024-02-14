@@ -52,6 +52,5 @@ vim.opt.colorcolumn = '80'
 
 require('lazy').setup('dnlx.plugins')
 
+require('dnlx.remap')
 
-
--- Set Colors
