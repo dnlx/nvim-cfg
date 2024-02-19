@@ -11,9 +11,9 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
-
+vim.api.nvim_exec('language en_US', true)
 vim.g.mapleader = ' '
-vim.keymap.set('n', '<leader>pv', vim.cmd.Ex)
+vim.keymap.set('n', '<leader>m', vim.cmd.Ex)
 
 
 -- vim.opt.guicursor = ''
@@ -35,8 +35,8 @@ vim.opt.backup = false
 vim.opt.undodir = os.getenv('UserProfile') .. '\\.vim\\undodir'
 vim.opt.undofile = true
 
-vim.opt.hlsearch = true
-vim.opt.incsearch = false 
+vim.opt.hlsearch = false
+vim.opt.incsearch = true 
 
 --vim.opt.termguicolors = true
 
