@@ -44,7 +44,7 @@ vim.opt.undodir = os.getenv('UserProfile') .. '\\.vim\\undodir'
 vim.opt.undofile = true
 
 vim.opt.hlsearch = false
-vim.opt.incsearch = true 
+vim.opt.incsearch = true
 
 
 vim.opt.scrolloff = 8
@@ -60,4 +60,4 @@ vim.opt.colorcolumn = '80'
 require('lazy').setup('dnlx.plugins')
 
 require('dnlx.remap')
-
+require('dnlx.config')
