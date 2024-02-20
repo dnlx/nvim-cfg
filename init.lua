@@ -9,7 +9,15 @@ if not vim.loop.fs_stat(lazypath) then
     lazypath,
   })
 end
+
 vim.opt.rtp:prepend(lazypath)
+
+
+-- Setup nvim-tree
+-- optionally enable 24-bit colour
+vim.opt.termguicolors = true
+
+
 
 vim.api.nvim_exec('language en_US', true)
 vim.g.mapleader = ' '
@@ -38,7 +46,6 @@ vim.opt.undofile = true
 vim.opt.hlsearch = false
 vim.opt.incsearch = true 
 
---vim.opt.termguicolors = true
 
 vim.opt.scrolloff = 8
 -- vim.opt.signcolumn = 'yes'
