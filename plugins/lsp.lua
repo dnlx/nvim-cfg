@@ -76,6 +76,27 @@ return {
                 function (server_name)
                     require('lspconfig')[server_name].setup {}
                 end,
+                ['pyright'] = function ()
+                    local lspconfig = require("lspconfig")
+                    lspconfig.pyright.setup {
+                        cmd = { "pyright-langserver", "--stdio" },
+                        filetypes = { "python" },
+                        --root_dir = function(startpath)
+                        --       return M.search_ancestors(startpath, matcher)
+                        --  end,
+                        settings = {
+                          python = {
+                            analysis = {
+                              autoSearchPaths = true,
+                              diagnosticMode = "workspace",
+                              useLibraryCodeForTypes = true,
+                              -- SMO specific info... 
+                          },
+                          },
+                        },
+                        single_file_support = true
+                    }
+                end,
             }
         })
         local cmp_select = { behavior = cmp.SelectBehavior.Select }
@@ -87,14 +108,14 @@ return {
               end,
             },
             window = {
-              -- completion = cmp.config.window.bordered(),
-              -- documentation = cmp.config.window.bordered(),
+              completion = cmp.config.window.bordered(),
+              documentation = cmp.config.window.bordered(),
             },
 
             mapping = cmp.mapping.preset.insert({
                 ['<C-k>'] = cmp.mapping.select_prev_item(cmp_select),
                 ['<C-j>'] = cmp.mapping.select_next_item(cmp_select),
-                ['<C-y>'] = cmp.mapping.confirm({ select = true }),
+                ['<CR>'] = cmp.mapping.confirm({ select = true }),
                 ["<C-Space>"] = cmp.mapping.complete(),
             }),
             sources = cmp.config.sources({
