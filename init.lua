@@ -55,7 +55,10 @@ vim.opt.updatetime = 50
 
 vim.opt.colorcolumn = '80'
 
-
+vim.api.nvim_create_autocmd({"BufWritePre"}, {
+    pattern = "*",
+    command = [[%s/\s\+$//e]],
+})
 
 require('lazy').setup('dnlx.plugins')
 
