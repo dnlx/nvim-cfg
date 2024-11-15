@@ -117,6 +117,7 @@ return {
                 ['<C-j>'] = cmp.mapping.select_next_item(cmp_select),
                 -- ['<CR>'] = cmp.mapping.confirm({ select = true }),
                 ['<C-z>'] = cmp.mapping.confirm({ select = true }),
+                ['<C-y>'] = cmp.mapping.confirm({ select = true }),
                 ["<C-Space>"] = cmp.mapping.complete(),
             }),
             sources = cmp.config.sources({

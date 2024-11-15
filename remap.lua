@@ -10,3 +10,5 @@ vim.keymap.set("x", "<leader>p", [["_dP]])
 
 -- for multi line I at the beginning:
 vim.keymap.set("i", "<C-c>", "<Esc>")
+vim.keymap.set("i", "<C-u>", "<Nop>")
+
