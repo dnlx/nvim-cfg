@@ -10,3 +10,10 @@ vim.keymap.set("x", "<leader>p", [["_dP]])
 
 -- for multi line I at the beginning:
 vim.keymap.set("i", "<C-c>", "<Esc>")
+
+-- get rid of the damn undo
+vim.keymap.set("i", "<C-u>", "<c-g>u<c-u>")
+vim.keymap.set("i", "<C-w>", "<c-g>w<c-w>")
+
+
+
