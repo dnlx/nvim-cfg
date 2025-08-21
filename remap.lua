@@ -12,4 +12,6 @@ vim.keymap.set("x", "<leader>p", [["_dP]])
 vim.keymap.set("i", "<C-c>", "<Esc>")
 vim.keymap.set("i", "<C-u>", "<Nop>")
 
-
+-- Copilot remap
+-- local map = vim.keymap.set
+-- map("i", "<C-l>", "copilot#Accept('<CR>')", {noremap = true, silent = true, expr=true, replace_keycodes = false })

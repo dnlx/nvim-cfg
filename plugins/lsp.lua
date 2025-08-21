@@ -1,143 +1,186 @@
--- Global mappings.
--- See `:help vim.diagnostic.*` for documentation on any of the below functions
-vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float)
-vim.keymap.set('n', '[d', vim.diagnostic.goto_prev)
-vim.keymap.set('n', ']d', vim.diagnostic.goto_next)
-vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist)
-
--- Use LspAttach autocommand to only map the following keys
--- after the language server attaches to the current buffer
-vim.api.nvim_create_autocmd('LspAttach', {
-  group = vim.api.nvim_create_augroup('UserLspConfig', {}),
-  callback = function(ev)
-    -- Enable completion triggered by <c-x><c-o>
-    vim.bo[ev.buf].omnifunc = 'v:lua.vim.lsp.omnifunc'
-
-    -- Buffer local mappings.
-    -- See `:help vim.lsp.*` for documentation on any of the below functions
-    local opts = { buffer = ev.buf }
-    vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, opts)
-    vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts)
-    vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, opts)
-    vim.keymap.set('n', 'K', vim.lsp.buf.hover, opts)
-    vim.keymap.set('n', '<C-k>', vim.lsp.buf.signature_help, opts)
-    vim.keymap.set('n', '<leader>wa', vim.lsp.buf.add_workspace_folder, opts)
-    vim.keymap.set('n', '<leader>wr', vim.lsp.buf.remove_workspace_folder, opts)
-    vim.keymap.set('n', '<leader>wl', function()
-      print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
-    end, opts)
-    vim.keymap.set('n', '<leader>D', vim.lsp.buf.type_definition, opts)
-    vim.keymap.set('n', '<leader>rn', vim.lsp.buf.rename, opts)
-    vim.keymap.set({ 'n', 'v' }, '<leader>ca', vim.lsp.buf.code_action, opts)
-    vim.keymap.set('n', 'gr', vim.lsp.buf.references, opts)
-    vim.keymap.set('n', '<leader>f', function()
-      vim.lsp.buf.format { async = true }
-    end, opts)
-  end,
-})
-
-
 return {
+    -- LSP Configuration & Plugins
     'neovim/nvim-lspconfig',
     dependencies = {
+        -- LSP Management
         'williamboman/mason.nvim',
         'williamboman/mason-lspconfig.nvim',
-        'j-hui/fidget.nvim',
-        'hrsh7th/cmp-nvim-lsp',
-        'hrsh7th/cmp-buffer',
-        'hrsh7th/cmp-path',
-        'hrsh7th/cmp-cmdline',
+
+        -- Autocompletion
         'hrsh7th/nvim-cmp',
-        'L3MON4D3/LuaSnip',
-        'saadparwaiz1/cmp_luasnip',
-        'folke/neodev.nvim'
+        'hrsh7th/cmp-nvim-lsp',
+
+        -- Optional but recommended for performance
+        'j-hui/fidget.nvim', -- LSP status updates
     },
     config = function()
-        -- IMPORTANT: make sure to setup neodev BEFORE lspconfig
-        require('neodev').setup({
-          -- add any options here, or leave empty to use the default settings
+        -- Set up Mason first
+        require('fidget').setup({})
+        require('mason').setup({
+            ui = { border = 'rounded', },
         })
 
-        local cmp = require('cmp')
-        local cmp_lsp = require("cmp_nvim_lsp")
-        local capabilities = vim.tbl_deep_extend(
-            "force",
-            {},
-            vim.lsp.protocol.make_client_capabilities(),
-            cmp_lsp.default_capabilities()
-        )
-        require('fidget').setup({})
-        require('mason').setup()
+        -- Configure LSP completion
+        local capabilities = require('cmp_nvim_lsp').default_capabilities()
+
+        -- Performance optimizations
+        capabilities.textDocument.completion.completionItem.snippetSupport = true
+        capabilities.textDocument.completion.completionItem.preselectSupport = true
+        capabilities.textDocument.completion.completionItem.insertReplaceSupport = true
+        capabilities.textDocument.completion.completionItem.resolveSupport = {
+            properties = {
+                'documentation',
+                'detail',
+                'additionalTextEdits',
+            }
+        }
+
         require('mason-lspconfig').setup({
             ensure_installed = {
                 'lua_ls',
+                'pyright',
             },
             handlers = {
                 function (server_name)
                     require('lspconfig')[server_name].setup {}
                 end,
-                ['pyright'] = function ()
-                    local lspconfig = require("lspconfig")
-                    lspconfig.pyright.setup {
-                        cmd = { "pyright-langserver", "--stdio" },
-                        filetypes = { "python" },
-                        --root_dir = function(startpath)
-                        --       return M.search_ancestors(startpath, matcher)
-                        --  end,
-                        settings = {
-                          python = {
-                            analysis = {
-                              autoSearchPaths = true,
-                              diagnosticMode = "workspace",
-                              useLibraryCodeForTypes = true,
-                              -- SMO specific info...
-                          },
-                          },
-                        },
-                        single_file_support = true
-                    }
+                -- Example server with optimized settings
+                ["lua_ls"] = function()
+                    require('lspconfig').lua_ls.setup({
+                        on_init = function(client)
+                            if client.workspace_folders then
+                              local path = client.workspace_folders[1].name
+                              if
+                                path ~= vim.fn.stdpath('config')
+                                and (vim.uv.fs_stat(path .. '/.luarc.json') or vim.uv.fs_stat(path .. '/.luarc.jsonc'))
+                              then
+                                return
+                              end
+                            end
+
+                            client.config.settings.Lua = vim.tbl_deep_extend('force', client.config.settings.Lua, {
+                              runtime = {
+                                -- Tell the language server which version of Lua you're using (most
+                                -- likely LuaJIT in the case of Neovim)
+                                version = 'LuaJIT',
+                                -- Tell the language server how to find Lua modules same way as Neovim
+                                -- (see `:h lua-module-load`)
+                                path = {
+                                  'lua/?.lua',
+                                  'lua/?/init.lua',
+                                },
+                              },
+                              -- Make the server aware of Neovim runtime files
+                              workspace = {
+                                checkThirdParty = false,
+                                library = {
+                                  vim.env.VIMRUNTIME
+                                  -- Depending on the usage, you might want to add additional paths
+                                  -- here.
+                                  -- '${3rd}/luv/library'
+                                  -- '${3rd}/busted/library'
+                                }
+                                -- Or pull in all of 'runtimepath'.
+                                -- NOTE: this is a lot slower and will cause issues when working on
+                                -- your own configuration.
+                                -- See https://github.com/neovim/nvim-lspconfig/issues/3189
+                                -- library = {
+                                --   vim.api.nvim_get_runtime_file('', true),
+                                -- }
+                              }
+                            })
+                          end,
+                          settings = {
+                            Lua = {
+                            globals = {'vim'}
+                        }
+                        }
+                    })
+                end,
+
+                -- Set up other servers
+                ["pyright"] = function()
+                    require('lspconfig').pyright.setup({
+                      capabilities = capabilities,
+                      settings = {
+                        python = {
+                          analysis = {
+                            autoSearchPaths = true,
+                            diagnosticMode = "workspace",
+                            useLibraryCodeForTypes = true,
+                            typeCheckingMode = "basic", -- Use 'off' for max performance
+                          }
+                        }
+                      },
+                      flags = {
+                        debounce_text_changes = 150,
+                      }
+                    })
                 end,
             }
         })
-        local cmp_select = { behavior = cmp.SelectBehavior.Select }
-        cmp.setup({
-            snippet = {
-              -- REQUIRED - you must specify a snippet engine
-              expand = function(args)
-                require('luasnip').lsp_expand(args.body) -- For `luasnip` users.
-              end,
-            },
-            window = {
-              -- completion = cmp.config.window.bordered(),
-              -- documentation = cmp.config.window.bordered(),
-            },
 
-            mapping = cmp.mapping.preset.insert({
-                ['<C-k>'] = cmp.mapping.select_prev_item(cmp_select),
-                ['<C-j>'] = cmp.mapping.select_next_item(cmp_select),
-                -- ['<CR>'] = cmp.mapping.confirm({ select = true }),
-                ['<C-z>'] = cmp.mapping.confirm({ select = true }),
-                ['<C-y>'] = cmp.mapping.confirm({ select = true }),
-                ["<C-Space>"] = cmp.mapping.complete(),
-            }),
-            sources = cmp.config.sources({
-              { name = 'nvim_lsp' },
-              { name = 'vsnip' }, -- For vsnip users.
-              -- { name = 'luasnip' }, -- For luasnip users.
-              -- { name = 'ultisnips' }, -- For ultisnips users.
-              -- { name = 'snippy' }, -- For snippy users.
-            }, {
-              { name = 'buffer' },
-            })
-          })
+        -- LSP keybindings
+        vim.keymap.set('n', 'gd', vim.lsp.buf.definition)
+        vim.keymap.set('n', 'K', vim.lsp.buf.hover)
+        vim.keymap.set('n', '<leader>rn', vim.lsp.buf.rename)
+        vim.keymap.set('n', '<leader>ca', vim.lsp.buf.code_action)
+        vim.keymap.set('n', 'gr', vim.lsp.buf.references)
+
+        -- Diagnostics navigation
+        vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float)
+
+        -- Diagnostics config (for performance)
         vim.diagnostic.config({
-          virtual_text = true,
-          signs = true,
-          update_in_insert = false,
-          underline = true,
-          severity_sort = false,
-          float = true,
+          virtual_text = {
+            -- prefix = '●',
+            severity = {
+              min = vim.diagnostic.severity.WARN
+            }
+          },
+          update_in_insert = false, -- Update diagnostics after leaving insert mode
+          severity_sort = true,
+          float = {
+            -- border = 'rounded',
+            -- source = 'always',
+            header = '',
+            prefix = '',
+          },
         })
-    end
-}
 
+
+        local cmp = require('cmp')
+        cmp.setup({
+             mapping = cmp.mapping.preset.insert({
+                  ['<C-k>'] = cmp.mapping.select_prev_item(),
+                  ['<C-j>'] = cmp.mapping.select_next_item(),
+                  -- ['<CR>'] = cmp.mapping.confirm({ select = true }),
+                  ['<C-z>'] = cmp.mapping.confirm({ select = true }),
+                  ['<C-y>'] = cmp.mapping.confirm({ select = true }),
+                  ["<C-Space>"] = cmp.mapping.complete(),
+              }),
+              sources = cmp.config.sources({
+              { name = 'nvim_lsp' },
+            }),
+            -- Performance settings
+            performance = {
+              max_view_entries = 20,
+              debounce = 100,
+              throttle = 50,
+            },
+            -- Simple window styling
+            window = {
+              completion = cmp.config.window.bordered(),
+              documentation = cmp.config.window.bordered(),
+            },
+            -- Prevent completion in comments
+            enabled = function()
+              local context = require('cmp.config.context')
+              if vim.api.nvim_buf_get_option(0, 'buftype') == 'prompt' then return false end
+              return not context.in_treesitter_capture('comment')
+                and not context.in_syntax_group('Comment')
+            end
+          })
+        end
+
+}
