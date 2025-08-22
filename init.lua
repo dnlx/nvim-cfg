@@ -17,12 +17,7 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 
--- Setup nvim-tree
--- optionally enable 24-bit colour
-vim.opt.termguicolors = true
-
-
-
+-- General options
 vim.api.nvim_exec('language en_US', true)
 vim.g.mapleader = ' '
 vim.keymap.set('n', '<leader>m', vim.cmd.Ex)
@@ -31,44 +26,39 @@ vim.keymap.set('n', '<leader>m', vim.cmd.Ex)
 -- vim.keymap.set('n', '<leader>m', "<CMD>lua MiniFiles.open()<CR>")
 
 
--- vim.opt.guicursor = ''
-
-vim.opt.nu = true
-vim.opt.relativenumber = true
-
+--- Tabs and shifting of lines are 4 white spaces wide and get expanded
+vim.opt.expandtab = true
 vim.opt.tabstop = 4
 vim.opt.softtabstop = 4
 vim.opt.shiftwidth = 4
-vim.opt.expandtab = true
 
+-- And also auto tab on newline
 vim.opt.smartindent = true
 
+-- And please do not wrap lines..
 vim.opt.wrap = false
 
+-- some tech stuff
 vim.opt.swapfile = false
 vim.opt.backup = false
 vim.opt.undodir = os.getenv('UserProfile') .. '\\.vim\\undodir'
 vim.opt.undofile = true
 
+-- how my search works
 vim.opt.hlsearch = false
 vim.opt.incsearch = true
 
-
-vim.opt.scrolloff = 8
-vim.opt.signcolumn = 'yes'
-
-
 vim.opt.updatetime = 50
 
-vim.opt.colorcolumn = '80'
 
+-- stuff
 vim.api.nvim_create_autocmd({"BufWritePre"}, {
     pattern = "*",
     command = [[%s/\s\+$//e]],
 })
 
 require('lazy').setup('dnlx.plugins')
+-- Why do I need to set up lualine here?
 
 require('dnlx.remap')
--- require('dnlx.config')
--- require('mini.files').setup()
+require('dnlx.visual')
