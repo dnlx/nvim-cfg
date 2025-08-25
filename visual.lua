@@ -3,7 +3,7 @@ vim.opt.number = true
 vim.opt.relativenumber = true
 
 vim.opt.signcolumn = "yes:1"    -- Minimal sign column
-vim.opt.cursorline = true       -- Highlight current line
+vim.opt.cursorline = false      -- Highlight current line
 vim.opt.showmode = false        -- Don't show mode in command line
 vim.opt.ruler = false           -- Hide ruler
 vim.opt.laststatus = 3          -- Global statusline

@@ -1,4 +1,4 @@
--- Bootstrap lazy.nvim
+-- -- Bootstrap lazy.nvim
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not (vim.uv or vim.loop).fs_stat(lazypath) then
   local lazyrepo = "https://github.com/folke/lazy.nvim.git"
@@ -15,14 +15,16 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
 end
 
 vim.opt.rtp:prepend(lazypath)
+vim.loader.enable()
 
 
 -- General options
-vim.api.nvim_exec('language en_US', true)
+-- vim.api.nvim_exec({'language en_US'}, {true})
+vim.cmd("language en_US")
 vim.g.mapleader = ' '
-vim.keymap.set('n', '<leader>m', vim.cmd.Ex)
--- vim.keymap.set('n', '<leader>m', "<CMD>Oil<CR>")
--- vim.keymap.set('n', '<leader>n', "<CMD>Oil --float<CR>")
+-- vim.keymap.set('n', '<leader>m', vim.cmd.Ex)
+vim.keymap.set('n', '<leader>m', "<CMD>Oil<CR>")
+vim.keymap.set('n', '<leader>n', "<CMD>Oil --float<CR>")
 -- vim.keymap.set('n', '<leader>m', "<CMD>lua MiniFiles.open()<CR>")
 
 
