@@ -43,7 +43,8 @@ vim.opt.wrap = false
 -- some tech stuff
 vim.opt.swapfile = false
 vim.opt.backup = false
-vim.opt.undodir = os.getenv('UserProfile') .. '\\.vim\\undodir'
+-- vim.opt.undodir = os.getenv('UserProfile') .. '\\.vim\\undodir'
+local homedir = vim.loop.os_homedir()
 vim.opt.undofile = true
 
 -- how my search works
