@@ -22,9 +22,9 @@ vim.loader.enable()
 -- vim.api.nvim_exec({'language en_US'}, {true})
 vim.cmd("language en_US.UTF-8")
 vim.g.mapleader = ' '
--- vim.keymap.set('n', '<leader>m', vim.cmd.Ex)
-vim.keymap.set('n', '<leader>m', "<CMD>Oil<CR>")
-vim.keymap.set('n', '<leader>n', "<CMD>Oil --float<CR>")
+vim.keymap.set('n', '<leader>m', vim.cmd.Ex)
+-- vim.keymap.set('n', '<leader>m', "<CMD>Oil<CR>")
+-- vim.keymap.set('n', '<leader>n', "<CMD>Oil --float<CR>")
 -- vim.keymap.set('n', '<leader>m', "<CMD>lua MiniFiles.open()<CR>")
 
 
